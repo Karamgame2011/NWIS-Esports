@@ -85,6 +85,11 @@ h3{font-family:var(--fh);font-size:1.1rem;font-weight:800;letter-spacing:2px;tex
 .admin-fab{position:fixed;right:1.2rem;bottom:1.2rem;z-index:300}
 .toast{position:fixed;bottom:1.8rem;left:1.8rem;z-index:600;background:var(--card2);border:1px solid var(--b2);border-radius:10px;padding:.7rem 1.1rem;font-size:.88rem;font-weight:600;transform:translateY(60px);opacity:0;transition:all .3s;pointer-events:none;max-width:300px}
 .toast.show{transform:none;opacity:1}.toast.err{border-color:var(--lose)}
+@keyframes glow{0%,100%{text-shadow:0 0 6px rgba(0,200,240,.7),0 0 14px rgba(0,98,255,.6)}50%{text-shadow:0 0 12px rgba(0,200,240,1),0 0 28px rgba(0,98,255,.9),0 0 46px rgba(51,153,255,.5)}}
+nav .tab.glow,aside button.glow{color:var(--accent);animation:glow 2.4s ease-in-out infinite}
+nav .tab.glow{background:radial-gradient(ellipse at 50% 100%,rgba(0,98,255,.28),transparent 70%)}
+aside button.glow{background:linear-gradient(90deg,rgba(0,98,255,.2),transparent);box-shadow:inset 3px 0 12px -4px rgba(0,200,240,.7)}
+video{width:100%;display:block;background:#000;max-height:260px}
 @media(max-width:700px){.nav-logo{display:none}nav .tab{padding:0 .5rem;font-size:.78rem}.nav-user span{display:none}}
 </style></head><body>
 <input type="file" id="f-pfp" accept="image/*" hidden><input type="file" id="f-ban" accept="image/*" hidden>
@@ -94,9 +99,9 @@ h3{font-family:var(--fh);font-size:1.1rem;font-weight:800;letter-spacing:2px;tex
 <div id="a1" style="display:none"><div class="fl">Username (letters, numbers, _ . -)</div><input class="ti" id="su-u"><div class="fl">Tag name (# + 5 characters)</div><input class="ti" id="su-t" maxlength="6" placeholder="#A1b2C"><div class="fl">Password</div><input class="ti" id="su-p" type="password"><div class="fl">Confirm Password</div><input class="ti" id="su-p2" type="password"><div class="err" id="e1"></div><button class="btn" onclick="signUp()">Create Account</button></div></div></div>
 
 <nav><button class="burger" onclick="document.body.classList.toggle('so')">&#9776;</button><div class="nav-logo">NWIS <span>E-Sports</span></div>
-<div class="tabs"><button class="tab" data-p="home" onclick="show('home')">Home</button><button class="tab" data-p="dash" onclick="show('dash')">Dashboard</button><button class="tab" data-p="clips" onclick="clipTab('all')">NWIS Clip-Share</button></div>
+<div class="tabs"><button class="tab" data-p="home" onclick="show('home')">Home</button><button class="tab" data-p="dash" onclick="show('dash')">Dashboard</button><button class="tab glow" data-p="clips" onclick="clipTab('all')">NWIS Clip-Share</button></div>
 <div class="nav-user"><span id="nu"></span><button class="nav-signout" onclick="signOut()">Sign Out</button></div></nav>
-<aside><div class="sh">Main tabs</div><button data-p="home" onclick="show('home')">Home</button><button data-p="dash" onclick="show('dash')">Dashboard</button><button data-p="clips" onclick="clipTab('all')">NWIS Clip-Share</button>
+<aside><div class="sh">Main tabs</div><button data-p="home" onclick="show('home')">Home</button><button data-p="dash" onclick="show('dash')">Dashboard</button><button class="glow" data-p="clips" onclick="clipTab('all')">NWIS Clip-Share</button>
 <div id="subs"></div><div class="sh">More</div><button data-p="players" onclick="show('players')">Players</button><button data-p="mate" onclick="show('mate')">Find a mate</button><button data-p="contact" onclick="show('contact')">Contact us</button></aside>
 
 <main>
@@ -125,7 +130,7 @@ h3{font-family:var(--fh);font-size:1.1rem;font-weight:800;letter-spacing:2px;tex
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getFirestore,doc,setDoc,getDoc,getDocs,collection,updateDoc,addDoc,query,orderBy,increment,arrayUnion,arrayRemove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyDNuj0bwWC8Zvk_UsjmOktHf1MTXo8OFP4",authDomain:"rl-tournament-kboayz.firebaseapp.com",projectId:"rl-tournament-kboayz",storageBucket:"rl-tournament-kboayz.firebasestorage.app",messagingSenderId:"836913120932",appId:"1:836913120932:web:c6994acf39bf71d6354831"});
-const db=getFirestore(app),ADMIN='1313';
+const db=getFirestore(app),ADMIN='1313',CLOUD='ootdsjoz',PRESET='nwis-Esports';
 const $=window.$=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tiers=(n,k)=>n.flatMap(x=>Array.from({length:k},(_,i)=>x+' '+(i+1)));
@@ -220,28 +225,38 @@ if(m=u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/
 if(m=u.match(/streamable\.com\/(?:e\/)?([a-z0-9]+)/i))return{src:`https://streamable.com/e/${m[1]}?autoplay=1`,thumb:''};
 if(m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/))return{src:`https://drive.google.com/file/d/${m[1]}/preview`,thumb:''};
 return null};
+const isVid=u=>/res\.cloudinary\.com/.test(u||'');
 function clipCard(c){const liked=(c.likes||[]).includes(me.uid),e=embed(c.url);
-return`<div class="card"><div class="player" id="pl-${c.id}" onclick="playClip('${c.id}')" ${e&&e.thumb?`style="background-image:url(${esc(e.thumb)})"`:''}><span class="play">&#9654;</span></div><div class="clip-meta"><h3 style="font-size:1rem">${esc(c.title)}</h3>
+const media=isVid(c.url)?`<video controls preload="metadata" src="${esc(c.url)}" onplay="viewClip('${c.id}',this)"></video>`:`<div class="player" id="pl-${c.id}" onclick="playClip('${c.id}')" ${e&&e.thumb?`style="background-image:url(${esc(e.thumb)})"`:''}><span class="play">&#9654;</span></div>`;
+return`<div class="card">${media}<div class="clip-meta"><h3 style="font-size:1rem">${esc(c.title)}</h3>
 <div>by <button class="link" onclick="viewProfile('${c.uid}')">${esc(c.username)}</button> <span class="chip">${gname(c.game)}</span></div>
 <span class="muted">${c.views||0} views</span><button class="mini like ${liked?'on':''}" onclick="likeClip('${c.id}')">${liked?'Liked':'Like'} · ${lk(c)}</button></div></div>`}
+window.viewClip=(id,v)=>{if(v.dataset.v)return;v.dataset.v=1;const c=clips.find(x=>x.id===id);c.views=(c.views||0)+1;updateDoc(doc(db,'clips',id),{views:increment(1)})};
 const cgrid=a=>a.length?`<div class="grid">${a.map(clipCard).join('')}</div>`:'<p class="muted">No clips yet.</p>';
 function renderClips(){const t=$('clips'),lab=Object.fromEntries(SUBS);$('clip-title').textContent=lab[sub];renderSubs();
 if(sub==='all')t.innerHTML=cgrid(clips);
 else if(sub==='trend')t.innerHTML=`<div class="sec" style="font-size:1.1rem">Top 3 — Most Views</div>${cgrid([...clips].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,3))}<div class="sec" style="font-size:1.1rem;margin-top:2rem">Top 3 — Most Likes</div>${cgrid([...clips].sort((a,b)=>lk(b)-lk(a)).slice(0,3))}`;
 else if(sub==='games')t.innerHTML=`<div class="row" style="margin:0 0 1.2rem">${Object.keys(G).map(k=>`<button class="mini ${gfilter===k?'on':''}" onclick="gfilter_('${k}')">${G[k].n}</button>`).join('')}</div>${gfilter?cgrid(clips.filter(c=>c.game===gfilter)):'<p class="muted">Pick a game to see its clips.</p>'}`;
-else t.innerHTML=`<div class="card pad" style="max-width:520px"><div class="fl">Game</div><select class="sel" id="u-g">${gopts()}</select><div class="fl">Title</div><input class="ti" id="u-t" placeholder="Clip title"><div class="fl">Clip link</div><input class="ti" id="u-l" placeholder="Paste a YouTube, Streamable or Google Drive link"><p class="muted" style="margin-top:.5rem">Upload your video to YouTube (Unlisted), Streamable, or Google Drive (share as "Anyone with the link"), then paste the link here.</p><div class="err" id="u-e"></div><button class="btn" id="u-b" style="margin-top:1rem" onclick="upClip()">Share clip</button></div>`}
+else t.innerHTML=`<div class="card pad" style="max-width:520px"><div class="fl">Game</div><select class="sel" id="u-g">${gopts()}</select><div class="fl">Title</div><input class="ti" id="u-t" placeholder="Clip title">${CLOUD?`<div class="fl">Video file (max 40 MB)</div><input class="ti" id="u-f" type="file" accept="video/*"><div class="fl">Or paste a link</div>`:`<div class="fl">Clip link</div>`}<input class="ti" id="u-l" placeholder="YouTube, Streamable or Google Drive link"><div class="err" id="u-e"></div><button class="btn" id="u-b" style="margin-top:1rem" onclick="upClip()">Share clip</button></div>`}
 window.gfilter_=k=>{gfilter=k;renderClips()};
 window.playClip=id=>{const c=clips.find(x=>x.id===id),e=embed(c.url),el=$('pl-'+id);if(!e){window.open(c.url,'_blank');return}
 el.innerHTML=`<iframe src="${e.src}" allow="autoplay;fullscreen" allowfullscreen style="width:100%;height:100%;border:0"></iframe>`;el.onclick=null;el.removeAttribute('onclick');el.style.cursor='default';
 if(!el.dataset.v){el.dataset.v=1;c.views=(c.views||0)+1;updateDoc(doc(db,'clips',id),{views:increment(1)})}};
 window.likeClip=async id=>{const c=clips.find(x=>x.id===id),on=(c.likes||[]).includes(me.uid);
 c.likes=on?c.likes.filter(x=>x!==me.uid):[...(c.likes||[]),me.uid];renderClips();await updateDoc(doc(db,'clips',id),{likes:on?arrayRemove(me.uid):arrayUnion(me.uid)})};
-window.upClip=async()=>{const l=$('u-l').value.trim(),t=$('u-t').value.trim(),b=$('u-b'),e=$('u-e');
-if(!l||!t){e.textContent='Add a title and a link';e.classList.add('show');return}
-if(!embed(l)){e.textContent='Link must be from YouTube, Streamable or Google Drive';e.classList.add('show');return}
+window.upClip=async()=>{const f=$('u-f')?.files[0],l=$('u-l').value.trim(),t=$('u-t').value.trim(),b=$('u-b'),e=$('u-e');
+const bad=m=>{e.textContent=m;e.classList.add('show')};
+if(!t)return bad('Add a title');if(!f&&!l)return bad('Choose a video file or paste a link');
+if(f&&f.size>40*1048576)return bad('file is too big');
+if(!f&&!embed(l))return bad('Link must be from YouTube, Streamable or Google Drive');
 b.disabled=true;
-try{await addDoc(collection(db,'clips'),{game:$('u-g').value,title:t,url:l,uid:me.uid,username:me.username,views:0,likes:[],createdAt:Date.now()});toast('Clip shared');clipTab('all')}
-catch(x){e.textContent=x.message;e.classList.add('show');b.disabled=false}};
+try{let url=l;
+if(f)url=await new Promise((res,rej)=>{const fd=new FormData();fd.append('file',f);fd.append('upload_preset',PRESET);const x=new XMLHttpRequest();x.open('POST',`https://api.cloudinary.com/v1_1/${CLOUD}/video/upload`);
+x.upload.onprogress=ev=>{if(ev.lengthComputable)b.textContent='Uploading '+Math.round(ev.loaded/ev.total*100)+'%'};
+x.onload=()=>{try{const j=JSON.parse(x.responseText);j.secure_url?res(j.secure_url.replace(/\.\w+$/,'.mp4')):rej(new Error(j.error?.message||'Upload failed'))}catch{rej(new Error('Upload failed'))}};
+x.onerror=()=>rej(new Error('Network error'));x.send(fd)});
+await addDoc(collection(db,'clips'),{game:$('u-g').value,title:t,url,uid:me.uid,username:me.username,views:0,likes:[],createdAt:Date.now()});toast('Clip shared');clipTab('all')}
+catch(x){bad(x.message);b.disabled=false;b.textContent='Share clip'}};
 
 /* FIND A MATE */
 window.mateModal=()=>openModal(`<div class="modal-title">Find a mate</div><div class="fl">What game do you want a duo in?</div><select class="sel" id="m-g">${gopts()}</select>
