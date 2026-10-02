@@ -106,7 +106,7 @@ video{width:100%;display:block;background:#000;max-height:260px}
 
 <main>
 <div class="page" id="p-home"><div class="hero"><div class="hero-eyebrow">Northern Warriors International School</div><h1>NWIS E-Sports<br>Hub</h1></div>
-<div class="sec">What you can do here</div><div class="grid">
+<div class="sec">Announcements &amp; Events</div><div id="posts" style="margin-bottom:2rem"></div><div class="sec">What you can do here</div><div class="grid">
 <div class="card pad"><h3>Dashboard</h3><p class="muted">Build your profile: username, tag, picture, banner, and the games you play with your in-game names and ranks.</p></div>
 <div class="card pad"><h3>NWIS Clip-Share</h3><p class="muted">Upload your best clips, browse everyone's, like them, and see what's trending.</p></div>
 <div class="card pad"><h3>Players</h3><p class="muted">Every registered student in one place. Open any profile to find their game names.</p></div>
@@ -116,7 +116,7 @@ video{width:100%;display:block;background:#000;max-height:260px}
 <div class="page" id="p-dash"><div class="sec">Dashboard</div><div id="dash"></div></div>
 <div class="page" id="p-profile"><div class="sec">Profile</div><button class="btn secondary" onclick="show('players')" style="margin-bottom:1rem">&larr; Back</button><div id="prof"></div></div>
 <div class="page" id="p-clips"><div class="sec" id="clip-title">All Clip-Shares</div><div id="clips"></div></div>
-<div class="page" id="p-players"><div class="sec">Players</div><div class="grid" id="players"></div></div>
+<div class="page" id="p-players"><div class="sec">Players</div><div class="row" style="margin:0 0 1.2rem"><input class="ti" id="pq" placeholder="Search name, tag or in-game name" style="max-width:280px" oninput="renderPlayers()"><select class="sel" id="pg" style="width:auto" onchange="pgChange()"><option value="">All games</option><option value="rl">Rocket League</option><option value="fn">Fortnite</option><option value="rb">Roblox</option><option value="fc">EA FC</option></select><select class="sel" id="pr" style="width:auto;display:none" onchange="renderPlayers()"></select></div><div class="grid" id="players"></div></div>
 <div class="page" id="p-mate"><div class="sec">Find a mate</div><button class="btn" onclick="mateModal()">Find a mate</button><div class="grid" id="mates" style="margin-top:1.4rem"></div></div>
 <div class="page" id="p-contact"><div class="sec">Contact us</div>
 <div class="card pad" style="max-width:520px;margin-bottom:1.2rem"><h3>Submit a report/complaint</h3><p class="muted" style="margin:.4rem 0 .9rem">Tell us about an issue and we'll reply personally.</p><button class="btn" onclick="reportModal()">Submit a report/complaint</button></div>
@@ -128,7 +128,7 @@ video{width:100%;display:block;background:#000;max-height:260px}
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getFirestore,doc,setDoc,getDoc,getDocs,collection,updateDoc,addDoc,query,orderBy,increment,arrayUnion,arrayRemove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getFirestore,doc,setDoc,getDoc,getDocs,collection,updateDoc,addDoc,query,orderBy,increment,arrayUnion,arrayRemove,deleteDoc,where}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyDNuj0bwWC8Zvk_UsjmOktHf1MTXo8OFP4",authDomain:"rl-tournament-kboayz.firebaseapp.com",projectId:"rl-tournament-kboayz",storageBucket:"rl-tournament-kboayz.firebasestorage.app",messagingSenderId:"836913120932",appId:"1:836913120932:web:c6994acf39bf71d6354831"});
 const db=getFirestore(app),ADMIN='1313',CLOUD='ootdsjoz',PRESET='nwis-Esports';
 const $=window.$=id=>document.getElementById(id);
@@ -139,7 +139,7 @@ fn:{n:'Fortnite',ranks:['Unranked',...tiers(['Bronze','Silver','Gold','Platinum'
 rb:{n:'Roblox'},fc:{n:'EA FC',vers:['FIFA 19','FIFA 20','FIFA 21','FIFA 22','FIFA 23','EA FC 24','EA FC 25','EA FC 26']}};
 const gname=k=>G[k]?.n||k;
 const DEF='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#8a949c"/><circle cx="50" cy="38" r="18" fill="#dfe4e8"/><path d="M14 92c0-22 16-34 36-34s36 12 36 34z" fill="#dfe4e8"/></svg>');
-let me=null,sub='all',clips=[],gfilter=null,cur='home';
+let adminOn=false,me=null,sub='all',clips=[],gfilter=null,cur='home';
 window.toast=(m,e)=>{const t=$('toast');t.textContent=m;t.className='toast show'+(e?' err':'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',3200)};
 window.openModal=h=>{$('md').innerHTML=h;$('ov').classList.add('open')};window.closeModal=()=>$('ov').classList.remove('open');
 const gopts=(sel)=>Object.keys(G).map(k=>`<option value="${k}" ${k===sel?'selected':''}>${G[k].n}</option>`).join('');
@@ -162,7 +162,7 @@ const color='#'+[0,1,2].map(()=>(80+Math.floor(Math.random()*150)).toString(16))
 const d={username:name,tag,password:p,bannerColor:color,banner:'',pfp:'',games:[],createdAt:Date.now()};
 await setDoc(doc(db,'tags',tid),{uid});await setDoc(doc(db,'users',uid),d);me={...d,uid};start()}catch(e){aerr(1,e.message)}};
 window.signOut=()=>{sessionStorage.removeItem('u');location.reload()};
-function start(){sessionStorage.setItem('u',me.uid);$('auth').style.display='none';$('nu').textContent=me.username+' '+me.tag;$('adm').style.display='block';
+function start(){sessionStorage.setItem('u',me.uid);$('auth').style.display='none';$('nu').textContent=me.username+' '+me.tag;$('adm').style.display='block';me.lastActive=Date.now();updateDoc(doc(db,'users',me.uid),{lastActive:me.lastActive}).catch(()=>{});
 if(innerWidth>=900)document.body.classList.add('so');show('home')}
 (async()=>{const u=sessionStorage.getItem('u');if(u){const s=await getDoc(doc(db,'users',u));if(s.exists()){me={...s.data(),uid:u};start()}}})();
 
@@ -171,13 +171,13 @@ const SUBS=[['all','All Clip-Shares'],['trend','Trending'],['games','Game Clip-S
 function renderSubs(){$('subs').innerHTML=SUBS.map(([k,l])=>`<button class="sub ${cur==='clips'&&sub===k?'active':''}" onclick="clipTab('${k}')">${l}</button>`).join('')}
 window.show=p=>{cur=p;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('p-'+p).classList.add('active');
 document.querySelectorAll('[data-p]').forEach(b=>b.classList.toggle('active',b.dataset.p===p));renderSubs();scrollTo(0,0);
-if(p==='dash')$('dash').innerHTML=profile(me,true);if(p==='players')loadPlayers();if(p==='mate')loadMates();if(p==='contact')loadMyReps();if(p==='clips')loadClips()};
+if(p==='dash')$('dash').innerHTML=profile(me,true);if(p==='players')loadPlayers();if(p==='mate')loadMates();if(p==='contact')loadMyReps();if(p==='clips')loadClips();if(p==='home')loadPosts()};
 window.clipTab=t=>{sub=t;gfilter=null;show('clips')};
 
 /* PROFILE */
 function bannerStyle(u){return u.banner?`background-image:url(${u.banner})`:`background:${u.bannerColor||'#0047cc'}`}
 function profile(u,e){let h=`<div class="card" style="margin-bottom:1.4rem"><div class="banner" style="${bannerStyle(u)}"></div><div class="pf-top"><span class="avatar" style="background-image:url(${u.pfp||DEF})"></span>
-<div class="pf-name">${esc(u.username)}<small>${esc(u.tag)}</small></div>`;
+<div class="pf-name">${esc(u.username)}<small>${esc(u.tag)}</small></div>${extras(u,e)}`;
 if(e)h+=`<div class="row"><button class="mini" onclick="$('f-pfp').click()">Upload picture</button><button class="mini" onclick="$('f-ban').click()">Upload banner</button>
 <label class="mini">Banner color <input type="color" value="${/^#[0-9a-f]{6}$/i.test(u.bannerColor)?u.bannerColor:'#0047cc'}" onchange="setBanColor(this.value)" style="vertical-align:middle;border:none;background:none;width:26px;height:20px"></label>
 <button class="mini del" onclick="resetImg('pfp')">Remove picture</button><button class="mini del" onclick="resetImg('banner')">Remove banner</button></div>`;
@@ -213,9 +213,14 @@ window.resetImg=async k=>{me[k]='';await updateDoc(doc(db,'users',me.uid),{[k]:'
 window.viewProfile=async uid=>{const s=await getDoc(doc(db,'users',uid));if(!s.exists())return;$('prof').innerHTML=profile(s.data(),false);show('profile')};
 
 /* PLAYERS */
-async function loadPlayers(){const s=await getDocs(collection(db,'users'));const a=[];s.forEach(d=>a.push({...d.data(),uid:d.id}));a.sort((x,y)=>x.username.localeCompare(y.username));
+let plist=[];
+async function loadPlayers(){const s=await getDocs(collection(db,'users'));const a=[];s.forEach(d=>a.push({...d.data(),uid:d.id}));a.sort((x,y)=>x.username.localeCompare(y.username));plist=a;renderPlayers()}
+window.pgChange=()=>{const g=$('pg').value,r=$('pr');if(G[g]&&G[g].ranks){r.innerHTML='<option value="">Any current rank</option>'+G[g].ranks.map(x=>`<option>${x}</option>`).join('');r.style.display='block'}else{r.style.display='none';r.innerHTML=''}renderPlayers()};
+window.renderPlayers=()=>{const q=$('pq').value.trim().toLowerCase(),g=$('pg').value,r=$('pr').value;
+const a=plist.filter(u=>{const gs=u.games||[];if(q&&!(u.username+' '+(u.tag||'')+' '+gs.map(x=>x.ign).join(' ')).toLowerCase().includes(q))return false;
+if(g&&!gs.some(x=>x.game===g))return false;if(g&&r&&(gs.find(x=>x.game===g)||{}).cur!==r)return false;return true});
 $('players').innerHTML=a.map(u=>`<div class="card pcard"><div class="minibanner" style="${bannerStyle(u)}"></div><span class="avatar" style="background-image:url(${u.pfp||DEF})"></span>
-<div class="pf-name" style="font-size:1.25rem">${esc(u.username)}</div><button class="mini" style="margin-top:.7rem" onclick="viewProfile('${u.uid}')">Show full profile</button></div>`).join('')}
+<div class="pf-name" style="font-size:1.25rem">${esc(u.username)}</div><button class="mini" style="margin-top:.7rem" onclick="viewProfile('${u.uid}')">Show full profile</button></div>`).join('')||'<p class="muted">No players match.</p>'};
 
 /* CLIPS */
 async function loadClips(){const s=await getDocs(query(collection(db,'clips'),orderBy('createdAt','desc')));clips=[];s.forEach(d=>clips.push({id:d.id,...d.data()}));renderClips()}
@@ -230,7 +235,7 @@ function clipCard(c){const liked=(c.likes||[]).includes(me.uid),e=embed(c.url);
 const media=isVid(c.url)?`<video controls preload="metadata" src="${esc(c.url)}" onplay="viewClip('${c.id}',this)"></video>`:`<div class="player" id="pl-${c.id}" onclick="playClip('${c.id}')" ${e&&e.thumb?`style="background-image:url(${esc(e.thumb)})"`:''}><span class="play">&#9654;</span></div>`;
 return`<div class="card">${media}<div class="clip-meta"><h3 style="font-size:1rem">${esc(c.title)}</h3>
 <div>by <button class="link" onclick="viewProfile('${c.uid}')">${esc(c.username)}</button> <span class="chip">${gname(c.game)}</span></div>
-<span class="muted">${c.views||0} views</span><button class="mini like ${liked?'on':''}" onclick="likeClip('${c.id}')">${liked?'Liked':'Like'} · ${lk(c)}</button></div></div>`}
+<span class="muted">${c.views||0} views</span><div class="row" style="margin:0"><button class="mini ${liked?'on':''}" onclick="likeClip('${c.id}')">${liked?'Liked':'Like'} · ${lk(c)}</button><button class="mini" onclick="openComments('${c.id}')">Comments · ${c.commentCount||0}</button>${c.uid===me.uid||adminOn?`<button class="mini del" onclick="delClip('${c.id}')">Delete</button>`:''}</div></div></div>`}
 window.viewClip=(id,v)=>{if(v.dataset.v)return;v.dataset.v=1;const c=clips.find(x=>x.id===id);c.views=(c.views||0)+1;updateDoc(doc(db,'clips',id),{views:increment(1)})};
 const cgrid=a=>a.length?`<div class="grid">${a.map(clipCard).join('')}</div>`:'<p class="muted">No clips yet.</p>';
 function renderClips(){const t=$('clips'),lab=Object.fromEntries(SUBS);$('clip-title').textContent=lab[sub];renderSubs();
@@ -264,8 +269,16 @@ window.mateModal=()=>openModal(`<div class="modal-title">Find a mate</div><div c
 <div class="fl">Info (optional)</div><textarea class="ti" id="m-i" placeholder="Training, ranking up, just for fun..."></textarea>
 <div class="actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="confirmMate()">Confirm</button></div>`);
 window.confirmMate=async()=>{try{await addDoc(collection(db,'mates'),{uid:me.uid,username:me.username,game:$('m-g').value,time:`${$('m-h').value}:${$('m-m').value} ${$('m-a').value}`,info:$('m-i').value.trim(),createdAt:Date.now()});closeModal();toast('Request posted');loadMates()}catch(e){toast(e.message,true)}};
-async function loadMates(){const s=await getDocs(query(collection(db,'mates'),orderBy('createdAt','desc')));const a=[];s.forEach(d=>a.push(d.data()));
-$('mates').innerHTML=a.map(m=>`<div class="card pad"><button class="link" onclick="viewProfile('${m.uid}')">${esc(m.username)}</button><div style="margin:.4rem 0"><span class="chip">${gname(m.game)}</span> <span class="chip">${esc(m.time)}</span></div><p class="muted">${esc(m.info)||'No extra info'}</p></div>`).join('')||'<p class="muted">No requests yet.</p>'}
+let matesList=[];
+async function loadMates(){const s=await getDocs(query(collection(db,'mates'),orderBy('createdAt','desc')));const a=[];s.forEach(d=>a.push({id:d.id,...d.data()}));matesList=a;renderMates()}
+function renderMates(){$('mates').innerHTML=matesList.map(m=>{const mine=m.uid===me.uid,j=m.joins||[],on=j.some(x=>x.uid===me.uid);
+return`<div class="card pad"><button class="link" onclick="viewProfile('${m.uid}')">${esc(m.username)}</button><div style="margin:.4rem 0"><span class="chip">${gname(m.game)}</span> <span class="chip">${esc(m.time)}</span></div><p class="muted">${esc(m.info)||'No extra info'}</p>
+${j.length?`<p class="muted" style="margin-top:.5rem">In: ${j.map(x=>`<button class="link" onclick="viewProfile('${x.uid}')">${esc(x.username)}</button>`).join(', ')}</p>`:''}
+<div class="row">${mine?'':`<button class="mini ${on?'on':''}" onclick="joinMate('${m.id}')">${on?`I'm in ✓`:`I'm in`}</button>`}${mine||adminOn?`<button class="mini del" onclick="delMate('${m.id}')">${mine?'Close request':'Delete'}</button>`:''}</div></div>`}).join('')||'<p class="muted">No requests yet.</p>'}
+window.joinMate=async id=>{const m=matesList.find(x=>x.id===id),e={uid:me.uid,username:me.username},on=(m.joins||[]).some(x=>x.uid===me.uid);
+m.joins=on?m.joins.filter(x=>x.uid!==me.uid):[...(m.joins||[]),e];renderMates();
+try{await updateDoc(doc(db,'mates',id),{joins:on?arrayRemove(e):arrayUnion(e)});toast(on?'Removed':`You're in — the poster can see your name`)}catch(x){toast(x.message,true)}};
+window.delMate=async id=>{if(!confirm('Delete this request?'))return;await deleteDoc(doc(db,'mates',id));toast('Deleted');loadMates()};
 
 /* CONTACT / REPORTS / ADMIN */
 window.reportModal=()=>openModal(`<div class="modal-title">Submit a report/complaint</div><div class="fl">Subject</div><input class="ti" id="r-s" placeholder="Main issue"><div class="fl">Body</div><textarea class="ti" id="r-b" placeholder="Describe the issue in full"></textarea>
@@ -276,8 +289,36 @@ async function allReports(){const s=await getDocs(query(collection(db,'reports')
 async function loadMyReps(){const a=(await allReports()).filter(r=>r.uid===me.uid);
 $('myreps').innerHTML=a.map(r=>`<div class="card pad" style="margin-bottom:.8rem"><h3>${esc(r.subject)}</h3><p class="muted" style="margin:.3rem 0">${esc(r.body)}</p>${r.reply?`<div class="kv"><span>Reply</span><b>${esc(r.reply)}</b></div>`:'<span class="chip">Awaiting reply</span>'}</div>`).join('')||'<p class="muted">No reports yet.</p>'}
 window.adminOpen=()=>openModal(`<div class="modal-title">Admin Panel</div><div class="fl">Admin code</div><input class="ti" id="ad-c" type="password" maxlength="4"><div class="actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="adminCheck()">Unlock</button></div>`);
-window.adminCheck=async()=>{if($('ad-c').value!==ADMIN){toast('Wrong code',true);return}const a=await allReports();
-openModal(`<div class="modal-title">All reports (${a.length})</div>${a.map(r=>`<div class="card pad" style="margin-bottom:.8rem"><b>${esc(r.subject)}</b> <span class="muted">— ${esc(r.username)}, ${fmt(r.createdAt)}</span><p class="muted" style="margin:.4rem 0">${esc(r.body)}</p>
-<textarea class="ti" id="rp-${r.id}" placeholder="Reply...">${esc(r.reply)}</textarea><button class="mini" style="margin-top:.5rem" onclick="sendReply('${r.id}')">Send reply</button></div>`).join('')||'<p class="muted">No reports.</p>'}<div class="actions"><button class="btn secondary" onclick="closeModal()">Close</button></div>`)};
+window.adminCheck=async()=>{if($('ad-c').value!==ADMIN){toast('Wrong code',true);return}adminOn=true;const a=await allReports();
+openModal(`<div class="modal-title">Admin Panel</div><p class="muted">Admin mode is on: Delete buttons now appear on clips, comments, posts and mate requests.</p>
+<div class="fl">New announcement / event</div><select class="sel" id="ap-t"><option value="announcement">Announcement</option><option value="event">Event</option></select>
+<input class="ti" id="ap-h" placeholder="Title" style="margin-top:.5rem"><textarea class="ti" id="ap-b" placeholder="Details" style="margin-top:.5rem"></textarea>
+<div class="fl">Event date and time (events only)</div><input class="ti" id="ap-d" type="datetime-local"><button class="btn" style="margin-top:.8rem" onclick="postAnn()">Post</button>
+<div class="sec" style="font-size:1rem;margin:1.4rem 0 .8rem">Reports (${a.length})</div>${a.map(r=>`<div class="card pad" style="margin-bottom:.8rem"><b>${esc(r.subject)}</b> <span class="muted">— ${esc(r.username)}, ${fmt(r.createdAt)}</span><p class="muted" style="margin:.4rem 0">${esc(r.body)}</p>
+<textarea class="ti" id="rp-${r.id}" placeholder="Reply...">${esc(r.reply)}</textarea><button class="mini" style="margin-top:.5rem" onclick="sendReply('${r.id}')">Send reply</button></div>`).join('')||'<p class="muted">No reports.</p>'}<div class="actions"><button class="btn secondary" onclick="closeModal();refresh()">Close</button></div>`)};
+window.refresh=()=>show(cur);
+window.postAnn=async()=>{const t=$('ap-h').value.trim(),b=$('ap-b').value.trim();if(!t)return toast('Add a title',true);
+try{await addDoc(collection(db,'posts'),{type:$('ap-t').value,title:t,body:b,date:$('ap-d').value||'',createdAt:Date.now()});toast('Posted');$('ap-h').value='';$('ap-b').value='';$('ap-d').value=''}catch(e){toast(e.message,true)}};
+async function loadPosts(){const s=await getDocs(query(collection(db,'posts'),orderBy('createdAt','desc')));const a=[];s.forEach(d=>a.push({id:d.id,...d.data()}));
+$('posts').innerHTML=a.map(p=>`<div class="card pad" style="margin-bottom:.8rem"><div class="row" style="margin:0 0 .4rem"><span class="chip">${p.type==='event'?'Event':'Announcement'}</span>${p.date?`<span class="chip">${fmt(p.date)}</span>`:''}<span class="muted">${fmt(p.createdAt)}</span></div><h3>${esc(p.title)}</h3><p class="muted" style="margin-top:.3rem;white-space:pre-wrap">${esc(p.body)}</p>${adminOn?`<button class="mini del" style="margin-top:.6rem" onclick="delPost('${p.id}')">Delete</button>`:''}</div>`).join('')||'<p class="muted">Nothing posted yet.</p>'}
+window.delPost=async id=>{if(!confirm('Delete this post?'))return;await deleteDoc(doc(db,'posts',id));loadPosts()};
+
+/* COMMENTS */
+let ccid=null;
+window.openComments=async id=>{ccid=id;openModal('<div class="modal-title">Comments</div><p class="muted">Loading...</p>');await drawComments()};
+async function drawComments(){const s=await getDocs(query(collection(db,'comments'),where('clipId','==',ccid)));const a=[];s.forEach(d=>a.push({id:d.id,...d.data()}));a.sort((x,y)=>x.createdAt-y.createdAt);
+openModal(`<div class="modal-title">Comments (${a.length})</div>${a.map(c=>`<div class="kv" style="display:block"><button class="link" onclick="closeModal();viewProfile('${c.uid}')">${esc(c.username)}</button> <span class="muted">${fmt(c.createdAt)}</span>${c.uid===me.uid||adminOn?` <button class="mini del" onclick="delComment('${c.id}')">Delete</button>`:''}<div>${esc(c.text)}</div></div>`).join('')||'<p class="muted">No comments yet. Be the first!</p>'}
+<div class="fl">Add a comment</div><textarea class="ti" id="cm-t" maxlength="300" style="min-height:60px"></textarea><div class="actions"><button class="btn secondary" onclick="closeModal()">Close</button><button class="btn" onclick="postComment()">Post</button></div>`)}
+const bump=n=>{const c=clips.find(x=>x.id===ccid);if(c)c.commentCount=Math.max(0,(c.commentCount||0)+n);updateDoc(doc(db,'clips',ccid),{commentCount:increment(n)});if(cur==='clips')renderClips()};
+window.postComment=async()=>{const t=$('cm-t').value.trim();if(!t)return toast('Write something first',true);
+try{await addDoc(collection(db,'comments'),{clipId:ccid,uid:me.uid,username:me.username,text:t,createdAt:Date.now()});bump(1);await drawComments()}catch(e){toast(e.message,true)}};
+window.delComment=async id=>{try{await deleteDoc(doc(db,'comments',id));bump(-1);await drawComments()}catch(e){toast(e.message,true)}};
+window.delClip=async id=>{if(!confirm('Delete this clip?'))return;try{await deleteDoc(doc(db,'clips',id));clips=clips.filter(x=>x.id!==id);renderClips();toast('Clip deleted')}catch(e){toast(e.message,true)}};
+
+/* PROFILE EXTRAS */
+const ago=t=>{if(!t)return 'a while ago';const m=Math.floor((Date.now()-t)/6e4);return m<2?'just now':m<60?m+' min ago':m<1440?Math.floor(m/60)+'h ago':Math.floor(m/1440)+'d ago'};
+const extras=(u,e)=>e?`<div class="fl">Bio (max 150 characters)</div><textarea class="ti" maxlength="150" style="min-height:60px" onchange="setField('bio',this.value.trim())">${esc(u.bio)}</textarea><div class="fl">Discord name</div><input class="ti" maxlength="40" value="${esc(u.discord)}" onchange="setField('discord',this.value.trim())">`:`${u.bio?`<p style="margin:.6rem 0">${esc(u.bio)}</p>`:''}<div class="row" style="margin-top:.5rem">${u.discord?`<span class="chip">Discord: ${esc(u.discord)}</span>`:''}<span class="muted">Last active: ${ago(u.lastActive)}</span></div>`;
+window.setField=(k,v)=>{me[k]=v;updateDoc(doc(db,'users',me.uid),{[k]:v}).then(()=>toast('Saved')).catch(x=>toast(x.message,true))};
+
 window.sendReply=async id=>{try{await updateDoc(doc(db,'reports',id),{reply:$('rp-'+id).value.trim()});toast('Reply saved')}catch(e){toast(e.message,true)}};
 </script></body></html>
