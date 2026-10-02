@@ -1,1 +1,263 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NWIS E-Sports</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#040e1c;--bg2:#071628;--bg3:#0a1e35;--card:#0d2240;--card2:#102850;--line:#0d2a4a;--b1:#0047cc;--b2:#0062ff;--b3:#3399ff;--b4:#7ec8ff;--accent:#00c8f0;--win:#00d97e;--lose:#f04040;--ticket:#f09030;--text:#c8dff0;--muted:#3a6888;--fh:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(0,100,220,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,100,220,.04) 1px,transparent 1px);background-size:48px 48px}
+nav{position:sticky;top:0;z-index:200;background:rgba(4,14,28,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 1rem;height:60px}
+.burger{background:none;border:none;color:var(--accent);font-size:1.6rem;cursor:pointer;margin-right:.8rem}
+.nav-logo{font-family:var(--fh);font-size:1.2rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-right:1.5rem;white-space:nowrap}
+.nav-logo span{color:var(--b4);font-weight:600}
+.tabs{display:flex;margin-right:auto}
+nav .tab{background:none;border:none;color:var(--muted);font-family:var(--fh);font-size:.95rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:0 .9rem;height:60px;cursor:pointer;border-bottom:3px solid transparent;transition:color .2s,border-color .2s;white-space:nowrap}
+nav .tab:hover,nav .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-user{font-size:.78rem;font-weight:700;color:var(--b3);letter-spacing:1px;padding:0 .8rem;border-left:1px solid var(--line);display:flex;align-items:center;gap:.6rem;white-space:nowrap}
+.nav-signout{background:none;border:1px solid var(--line);border-radius:5px;color:var(--muted);font-family:var(--fh);font-size:.72rem;letter-spacing:1px;padding:3px 8px;cursor:pointer;text-transform:uppercase}
+.nav-signout:hover{border-color:var(--lose);color:var(--lose)}
+aside{position:fixed;top:60px;bottom:0;left:0;width:240px;z-index:150;background:var(--bg2);border-right:1px solid var(--line);padding:1.2rem 0;transform:translateX(-100%);transition:transform .25s;overflow-y:auto}
+body.so aside{transform:none}
+.sh{font-family:var(--fh);font-size:.75rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--muted);padding:.8rem 1.3rem .4rem}
+aside button{display:block;width:100%;text-align:left;background:none;border:none;border-left:3px solid transparent;color:var(--text);font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:.5rem 1.3rem;cursor:pointer}
+aside button.sub{padding-left:2.3rem;font-size:.88rem;color:var(--muted)}
+aside button:hover,aside button.active{color:var(--accent);border-left-color:var(--accent);background:rgba(0,200,240,.04)}
+main{position:relative;z-index:1;transition:margin .25s}
+@media(min-width:900px){body.so main{margin-left:240px}}
+.page{display:none;padding:2rem 1rem 5rem;max-width:1120px;margin:0 auto}
+.page.active{display:block;animation:up .3s ease}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.sec{font-family:var(--fh);font-size:1.5rem;font-weight:900;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin:0 0 1.4rem;display:flex;align-items:center;gap:.8rem}
+.sec::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--b1),transparent)}
+.btn{background:var(--b1);border:none;border-radius:6px;color:#fff;font-family:var(--fh);font-weight:700;font-size:.95rem;letter-spacing:2px;text-transform:uppercase;padding:.55rem 1.4rem;cursor:pointer;transition:background .2s,transform .1s}
+.btn:hover{background:var(--b2)}.btn:active{transform:scale(.97)}.btn:disabled{opacity:.4}
+.btn.secondary{background:transparent;border:1px solid var(--line);color:var(--muted)}.btn.secondary:hover{border-color:var(--b2);color:var(--b3)}
+.mini{font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:4px;border:1px solid var(--line);background:var(--bg3);color:var(--muted);cursor:pointer;font-family:var(--fh)}
+.mini:hover{border-color:var(--b2);color:var(--b3)}.mini.del:hover{border-color:var(--lose);color:var(--lose)}.mini.on{border-color:var(--accent);color:var(--accent)}
+.ti,.sel{background:var(--bg3);border:1px solid var(--line);border-radius:7px;color:var(--text);font-family:var(--fb);font-size:.92rem;padding:.5rem .8rem;outline:none;width:100%;transition:border-color .2s}
+.ti:focus,.sel:focus{border-color:var(--accent)}.ti::placeholder{color:var(--muted)}.sel{cursor:pointer}
+textarea.ti{resize:vertical;min-height:90px}
+.fl{font-size:.72rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:.7rem 0 .3rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:border-color .2s,transform .2s}
+.card:hover{border-color:var(--b2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem}
+.pad{padding:1.1rem 1.2rem}
+.chip{background:rgba(0,98,255,.08);border:1px solid rgba(0,98,255,.18);border-radius:4px;padding:2px 8px;font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--b3);display:inline-block}
+.muted{color:var(--muted);font-size:.88rem}
+h3{font-family:var(--fh);font-size:1.1rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#fff}
+.link{color:var(--accent);cursor:pointer;font-weight:700;background:none;border:none;font-family:inherit;font-size:inherit}.link:hover{text-decoration:underline}
+/* hero */
+.hero{text-align:center;padding:1.5rem 0 2rem}
+.hero-eyebrow{font-family:var(--fh);font-size:.85rem;font-weight:700;letter-spacing:5px;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem}
+.hero h1{font-family:var(--fh);font-weight:900;font-size:clamp(2.2rem,6vw,4.5rem);line-height:.95;text-transform:uppercase;background:linear-gradient(160deg,#fff 0%,var(--b4) 40%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.foot{text-align:center;margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+/* auth */
+.auth-gate{position:fixed;inset:0;z-index:400;background:rgba(4,14,28,.97);display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
+.auth-box{background:var(--bg2);border:1px solid var(--accent);border-radius:18px;padding:2rem;width:100%;max-width:380px;box-shadow:0 0 50px rgba(0,200,240,.1)}
+.auth-box h2{font-family:var(--fh);font-size:1.3rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.auth-box p{font-size:.83rem;color:var(--muted);margin-bottom:1.2rem}
+.auth-tabs{display:flex;margin-bottom:1.2rem;background:var(--bg3);border-radius:7px;padding:3px}
+.auth-tab{flex:1;background:none;border:none;color:var(--muted);font-family:var(--fh);font-size:.88rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:.4rem;border-radius:5px;cursor:pointer}
+.auth-tab.active{background:var(--b1);color:#fff}
+.err{font-size:.78rem;color:var(--lose);font-weight:600;margin:.6rem 0;display:none}.err.show{display:block}
+.auth-box .btn{width:100%;margin-top:.8rem;background:linear-gradient(135deg,var(--b1),var(--b2))}
+/* profile */
+.banner{height:170px;background-size:cover;background-position:center}
+.pf-top{position:relative;padding:0 1.4rem 1.2rem}
+.avatar{width:104px;height:104px;border-radius:50%;border:4px solid var(--card);margin-top:-52px;background:var(--bg3) center/cover;display:block}
+.pf-name{font-family:var(--fh);font-size:1.8rem;font-weight:900;letter-spacing:2px;color:#fff;margin-top:.4rem}
+.pf-name small{font-size:1rem;color:var(--accent);margin-left:.5rem;letter-spacing:1px}
+.row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:.8rem}
+.gc{margin-bottom:1rem}.gh{display:flex;justify-content:space-between;align-items:center;padding:.6rem 1.2rem;background:var(--bg3);border-bottom:1px solid var(--line)}
+.kv{display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(13,42,74,.6);font-size:.9rem}.kv span{color:var(--muted)}
+.minibanner{height:64px;background-size:cover}
+.pcard{text-align:center;padding-bottom:1rem}.pcard .avatar{width:72px;height:72px;margin:-36px auto 0}
+/* clips */
+video{width:100%;display:block;background:#000;max-height:260px}
+.clip-meta{padding:.8rem 1rem;display:flex;flex-direction:column;gap:.4rem}
+.like{align-self:flex-start}
+.over{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:1rem}
+.over.open{display:flex;animation:up .2s}
+.modal{background:var(--bg2);border:1px solid var(--accent);border-radius:16px;padding:1.6rem;max-width:520px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-title{font-family:var(--fh);font-size:1.15rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem}
+.actions{display:flex;gap:.7rem;justify-content:flex-end;margin-top:1.2rem}
+.admin-fab{position:fixed;right:1.2rem;bottom:1.2rem;z-index:300}
+.toast{position:fixed;bottom:1.8rem;left:1.8rem;z-index:600;background:var(--card2);border:1px solid var(--b2);border-radius:10px;padding:.7rem 1.1rem;font-size:.88rem;font-weight:600;transform:translateY(60px);opacity:0;transition:all .3s;pointer-events:none;max-width:300px}
+.toast.show{transform:none;opacity:1}.toast.err{border-color:var(--lose)}
+@media(max-width:700px){.nav-logo{display:none}nav .tab{padding:0 .5rem;font-size:.78rem}.nav-user span{display:none}}
+</style></head><body>
+<input type="file" id="f-pfp" accept="image/*" hidden><input type="file" id="f-ban" accept="image/*" hidden>
+<div class="auth-gate" id="auth"><div class="auth-box"><h2>NWIS E-Sports</h2><p>Sign in or create your account to continue</p>
+<div class="auth-tabs"><button class="auth-tab active" onclick="authTab(0)">Sign In</button><button class="auth-tab" onclick="authTab(1)">Sign Up</button></div>
+<div id="a0"><div class="fl">Username</div><input class="ti" id="si-u"><div class="fl">Password</div><input class="ti" id="si-p" type="password"><div class="err" id="e0"></div><button class="btn" onclick="signIn()">Sign In</button></div>
+<div id="a1" style="display:none"><div class="fl">Username (letters, numbers, _ . -)</div><input class="ti" id="su-u"><div class="fl">Tag name (# + 5 characters)</div><input class="ti" id="su-t" maxlength="6" placeholder="#A1b2C"><div class="fl">Password</div><input class="ti" id="su-p" type="password"><div class="fl">Confirm Password</div><input class="ti" id="su-p2" type="password"><div class="err" id="e1"></div><button class="btn" onclick="signUp()">Create Account</button></div></div></div>
 
+<nav><button class="burger" onclick="document.body.classList.toggle('so')">&#9776;</button><div class="nav-logo">NWIS <span>E-Sports</span></div>
+<div class="tabs"><button class="tab" data-p="home" onclick="show('home')">Home</button><button class="tab" data-p="dash" onclick="show('dash')">Dashboard</button><button class="tab" data-p="clips" onclick="clipTab('all')">NWIS Clip-Share</button></div>
+<div class="nav-user"><span id="nu"></span><button class="nav-signout" onclick="signOut()">Sign Out</button></div></nav>
+<aside><div class="sh">Main tabs</div><button data-p="home" onclick="show('home')">Home</button><button data-p="dash" onclick="show('dash')">Dashboard</button><button data-p="clips" onclick="clipTab('all')">NWIS Clip-Share</button>
+<div id="subs"></div><div class="sh">More</div><button data-p="players" onclick="show('players')">Players</button><button data-p="mate" onclick="show('mate')">Find a mate</button><button data-p="contact" onclick="show('contact')">Contact us</button></aside>
+
+<main>
+<div class="page" id="p-home"><div class="hero"><div class="hero-eyebrow">Northern Warriors International School</div><h1>NWIS E-Sports<br>Hub</h1></div>
+<div class="sec">What you can do here</div><div class="grid">
+<div class="card pad"><h3>Dashboard</h3><p class="muted">Build your profile: username, tag, picture, banner, and the games you play with your in-game names and ranks.</p></div>
+<div class="card pad"><h3>NWIS Clip-Share</h3><p class="muted">Upload your best clips, browse everyone's, like them, and see what's trending.</p></div>
+<div class="card pad"><h3>Players</h3><p class="muted">Every registered student in one place. Open any profile to find their game names.</p></div>
+<div class="card pad"><h3>Find a mate</h3><p class="muted">Book a duo: pick a game, a time, and say what you need a mate for.</p></div>
+<div class="card pad"><h3>Contact us</h3><p class="muted">Reach the admin directly or submit a report/complaint and get a personal reply.</p></div></div>
+<div class="foot">If there is any errors and/or bugs please <button class="link" onclick="show('contact')">contact us</button></div></div>
+<div class="page" id="p-dash"><div class="sec">Dashboard</div><div id="dash"></div></div>
+<div class="page" id="p-profile"><div class="sec">Profile</div><button class="btn secondary" onclick="show('players')" style="margin-bottom:1rem">&larr; Back</button><div id="prof"></div></div>
+<div class="page" id="p-clips"><div class="sec" id="clip-title">All Clip-Shares</div><div id="clips"></div></div>
+<div class="page" id="p-players"><div class="sec">Players</div><div class="grid" id="players"></div></div>
+<div class="page" id="p-mate"><div class="sec">Find a mate</div><button class="btn" onclick="mateModal()">Find a mate</button><div class="grid" id="mates" style="margin-top:1.4rem"></div></div>
+<div class="page" id="p-contact"><div class="sec">Contact us</div>
+<div class="card pad" style="max-width:520px;margin-bottom:1.2rem"><h3>Submit a report/complaint</h3><p class="muted" style="margin:.4rem 0 .9rem">Tell us about an issue and we'll reply personally.</p><button class="btn" onclick="reportModal()">Submit a report/complaint</button></div>
+<div class="card pad" style="max-width:520px;margin-bottom:1.2rem"><h3>Contact directly</h3><div class="kv"><span>Phone</span><b>+966569575167</b></div><div class="kv"><span>Email</span><b>karamawad90@gmail.com</b></div></div>
+<div class="sec" style="font-size:1.1rem">My reports</div><div id="myreps"></div></div>
+</main>
+<button class="btn secondary admin-fab" id="adm" onclick="adminOpen()" style="display:none">Admin</button>
+<div class="over" id="ov"><div class="modal" id="md"></div></div><div class="toast" id="toast"></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,doc,setDoc,getDoc,getDocs,collection,updateDoc,addDoc,query,orderBy,increment,arrayUnion,arrayRemove}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getStorage,ref,uploadBytes,getDownloadURL}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+const app=initializeApp({apiKey:"AIzaSyDNuj0bwWC8Zvk_UsjmOktHf1MTXo8OFP4",authDomain:"rl-tournament-kboayz.firebaseapp.com",projectId:"rl-tournament-kboayz",storageBucket:"rl-tournament-kboayz.firebasestorage.app",messagingSenderId:"836913120932",appId:"1:836913120932:web:c6994acf39bf71d6354831"});
+const db=getFirestore(app),st=getStorage(app),ADMIN='1313';
+const $=window.$=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tiers=(n,k)=>n.flatMap(x=>Array.from({length:k},(_,i)=>x+' '+(i+1)));
+const G={rl:{n:'Rocket League',ranks:['Unranked',...tiers(['Bronze','Silver','Gold','Platinum','Diamond','Champion','Grand Champion'],3),'Supersonic Legend']},
+fn:{n:'Fortnite',ranks:['Unranked',...tiers(['Bronze','Silver','Gold','Platinum','Diamond'],3),'Elite','Champion','Unreal']},
+rb:{n:'Roblox'},fc:{n:'EA FC',vers:['FIFA 19','FIFA 20','FIFA 21','FIFA 22','FIFA 23','EA FC 24','EA FC 25','EA FC 26']}};
+const gname=k=>G[k]?.n||k;
+const DEF='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#8a949c"/><circle cx="50" cy="38" r="18" fill="#dfe4e8"/><path d="M14 92c0-22 16-34 36-34s36 12 36 34z" fill="#dfe4e8"/></svg>');
+let me=null,sub='all',clips=[],gfilter=null,cur='home';
+window.toast=(m,e)=>{const t=$('toast');t.textContent=m;t.className='toast show'+(e?' err':'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',3200)};
+window.openModal=h=>{$('md').innerHTML=h;$('ov').classList.add('open')};window.closeModal=()=>$('ov').classList.remove('open');
+const gopts=(sel)=>Object.keys(G).map(k=>`<option value="${k}" ${k===sel?'selected':''}>${G[k].n}</option>`).join('');
+const opts=(a,v)=>a.map(x=>`<option ${x===v?'selected':''}>${x}</option>`).join('');
+const fmt=t=>new Date(t).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+
+/* AUTH */
+window.authTab=i=>{document.querySelectorAll('.auth-tab').forEach((t,j)=>t.classList.toggle('active',i===j));$('a0').style.display=i?'none':'block';$('a1').style.display=i?'block':'none'};
+const aerr=(i,m)=>{$('e'+i).textContent=m;$('e'+i).classList.add('show')};
+window.signIn=async()=>{const u=$('si-u').value.trim().toLowerCase(),p=$('si-p').value;if(!u||!p)return aerr(0,'Fill in both fields');
+try{const s=await getDoc(doc(db,'users',u));if(!s.exists())return aerr(0,'Username not found');if(s.data().password!==p)return aerr(0,'Wrong password');me={...s.data(),uid:u};start()}catch(e){aerr(0,e.message)}};
+window.signUp=async()=>{const name=$('su-u').value.trim(),tag=$('su-t').value.trim(),p=$('su-p').value;
+if(!/^[A-Za-z0-9_.-]{2,20}$/.test(name))return aerr(1,'Username: 2-20 letters, numbers, _ . -');
+if(!/^#[A-Za-z0-9]{5}$/.test(tag))return aerr(1,'Tag must be # followed by exactly 5 letters/numbers');
+if(p.length<4)return aerr(1,'Password must be at least 4 characters');if(p!==$('su-p2').value)return aerr(1,'Passwords do not match');
+try{const uid=name.toLowerCase(),tid=tag.toLowerCase();
+if((await getDoc(doc(db,'users',uid))).exists())return aerr(1,'Username already taken');
+if((await getDoc(doc(db,'tags',tid))).exists())return aerr(1,'That tag name is already taken');
+const color='#'+[0,1,2].map(()=>(80+Math.floor(Math.random()*150)).toString(16)).join('');
+const d={username:name,tag,password:p,bannerColor:color,banner:'',pfp:'',games:[],createdAt:Date.now()};
+await setDoc(doc(db,'tags',tid),{uid});await setDoc(doc(db,'users',uid),d);me={...d,uid};start()}catch(e){aerr(1,e.message)}};
+window.signOut=()=>{sessionStorage.removeItem('u');location.reload()};
+function start(){sessionStorage.setItem('u',me.uid);$('auth').style.display='none';$('nu').textContent=me.username+' '+me.tag;$('adm').style.display='block';
+if(innerWidth>=900)document.body.classList.add('so');show('home')}
+(async()=>{const u=sessionStorage.getItem('u');if(u){const s=await getDoc(doc(db,'users',u));if(s.exists()){me={...s.data(),uid:u};start()}}})();
+
+/* NAV */
+const SUBS=[['all','All Clip-Shares'],['trend','Trending'],['games','Game Clip-Shares'],['up','Upload a Clip-Share']];
+function renderSubs(){$('subs').innerHTML=SUBS.map(([k,l])=>`<button class="sub ${cur==='clips'&&sub===k?'active':''}" onclick="clipTab('${k}')">${l}</button>`).join('')}
+window.show=p=>{cur=p;document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$('p-'+p).classList.add('active');
+document.querySelectorAll('[data-p]').forEach(b=>b.classList.toggle('active',b.dataset.p===p));renderSubs();scrollTo(0,0);
+if(p==='dash')$('dash').innerHTML=profile(me,true);if(p==='players')loadPlayers();if(p==='mate')loadMates();if(p==='contact')loadMyReps();if(p==='clips')loadClips()};
+window.clipTab=t=>{sub=t;gfilter=null;show('clips')};
+
+/* PROFILE */
+function bannerStyle(u){return u.banner?`background-image:url(${u.banner})`:`background:${u.bannerColor||'#0047cc'}`}
+function profile(u,e){let h=`<div class="card" style="margin-bottom:1.4rem"><div class="banner" style="${bannerStyle(u)}"></div><div class="pf-top"><span class="avatar" style="background-image:url(${u.pfp||DEF})"></span>
+<div class="pf-name">${esc(u.username)}<small>${esc(u.tag)}</small></div>`;
+if(e)h+=`<div class="row"><button class="mini" onclick="$('f-pfp').click()">Upload picture</button><button class="mini" onclick="$('f-ban').click()">Upload banner</button>
+<label class="mini">Banner color <input type="color" value="${/^#[0-9a-f]{6}$/i.test(u.bannerColor)?u.bannerColor:'#0047cc'}" onchange="setBanColor(this.value)" style="vertical-align:middle;border:none;background:none;width:26px;height:20px"></label>
+<button class="mini del" onclick="resetImg('pfp')">Remove picture</button><button class="mini del" onclick="resetImg('banner')">Remove banner</button></div>`;
+h+=`</div></div><div class="sec" style="font-size:1.1rem">Games</div>`;
+if(!(u.games||[]).length)h+=`<p class="muted">${e?'No games yet — add one below.':'No games added.'}</p>`;
+(u.games||[]).forEach((g,i)=>h+=gameCard(g,i,e));
+if(e)h+=`<button class="btn" onclick="addGameModal()" style="margin-top:.6rem">Add game</button>`;return h}
+function gameCard(g,i,e){const d=G[g.game]||{};
+const tx=(l,v,k)=>e?`<div class="fl">${l}</div><input class="ti" value="${esc(v)}" onchange="upd(${i},'${k}',this.value)">`:`<div class="kv"><span>${l}</span><b>${esc(v)||'—'}</b></div>`;
+const sl=(l,v,k)=>e?`<div class="fl">${l}</div><select class="sel" onchange="upd(${i},'${k}',this.value)">${opts(d.ranks,v||'Unranked')}</select>`:`<div class="kv"><span>${l}</span><b>${esc(v)||'—'}</b></div>`;
+let b=tx('Username in '+d.n,g.ign,'ign');
+if(d.ranks)b+=sl('Peak rank',g.peak,'peak')+sl('Current rank',g.cur,'cur');
+if(g.game==='rb'){const f=g.favs||['','',''];b+=e?`<div class="fl">Favorite Roblox games</div>`+[0,1,2].map(j=>`<input class="ti" style="margin-bottom:.4rem" placeholder="Favorite game ${j+1}" value="${esc(f[j])}" onchange="updFav(${i},${j},this.value)">`).join(''):`<div class="kv"><span>Favorite games</span><b>${f.filter(Boolean).map(esc).join(', ')||'—'}</b></div>`}
+if(g.game==='fc'){const v=g.versions||[];b+=`<div class="fl">Versions</div><div class="row" style="margin:0">${v.map(x=>`<span class="chip">${x}${e?` <span style="cursor:pointer;color:var(--lose)" onclick="rmVer(${i},'${x}')">&times;</span>`:''}</span>`).join('')||'<span class="muted">None</span>'}</div>`;
+if(e)b+=`<div class="row"><select class="sel" id="ver-${i}" style="width:auto">${opts(d.vers.filter(x=>!v.includes(x)))}</select><button class="mini" onclick="addVer(${i})">Add version</button></div>`}
+return`<div class="card gc"><div class="gh"><h3>${d.n}</h3>${e?`<button class="mini del" onclick="rmGame(${i})">Remove</button>`:''}</div><div class="pad">${b}</div></div>`}
+const saveG=()=>updateDoc(doc(db,'users',me.uid),{games:me.games}).catch(e=>toast(e.message,true));
+window.upd=(i,k,v)=>{me.games[i][k]=v;saveG();toast('Saved')};
+window.updFav=(i,j,v)=>{const f=me.games[i].favs||['','',''];f[j]=v;me.games[i].favs=f;saveG()};
+window.addVer=i=>{const v=$('ver-'+i).value;if(!v)return;(me.games[i].versions??=[]).push(v);saveG();show('dash')};
+window.rmVer=(i,v)=>{me.games[i].versions=me.games[i].versions.filter(x=>x!==v);saveG();show('dash')};
+window.rmGame=i=>{if(!confirm('Remove this game?'))return;me.games.splice(i,1);saveG();show('dash')};
+window.addGameModal=()=>{const left=Object.keys(G).filter(k=>!me.games.some(g=>g.game===k));
+if(!left.length)return toast('You added all games',true);
+openModal(`<div class="modal-title">Add game</div><select class="sel" id="ag">${left.map(k=>`<option value="${k}">${G[k].n}</option>`).join('')}</select><div class="actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="addGame()">Add</button></div>`)};
+window.addGame=()=>{const k=$('ag').value;me.games.push({game:k,ign:'',peak:'Unranked',cur:'Unranked',favs:['','',''],versions:[]});saveG();closeModal();show('dash')};
+function shrink(file,w,h,q){return new Promise(r=>{const im=new Image();im.onload=()=>{const s=Math.max(w/im.width,h/im.height),c=document.createElement('canvas');c.width=w;c.height=h;
+c.getContext('2d').drawImage(im,(w-im.width*s)/2,(h-im.height*s)/2,im.width*s,im.height*s);r(c.toDataURL('image/jpeg',q))};im.src=URL.createObjectURL(file)})}
+$('f-pfp').onchange=async e=>{if(!e.target.files[0])return;me.pfp=await shrink(e.target.files[0],256,256,.8);await updateDoc(doc(db,'users',me.uid),{pfp:me.pfp});show('dash')};
+$('f-ban').onchange=async e=>{if(!e.target.files[0])return;me.banner=await shrink(e.target.files[0],900,300,.75);await updateDoc(doc(db,'users',me.uid),{banner:me.banner});show('dash')};
+window.setBanColor=async c=>{me.bannerColor=c;me.banner='';await updateDoc(doc(db,'users',me.uid),{bannerColor:c,banner:''});show('dash')};
+window.resetImg=async k=>{me[k]='';await updateDoc(doc(db,'users',me.uid),{[k]:''});show('dash')};
+window.viewProfile=async uid=>{const s=await getDoc(doc(db,'users',uid));if(!s.exists())return;$('prof').innerHTML=profile(s.data(),false);show('profile')};
+
+/* PLAYERS */
+async function loadPlayers(){const s=await getDocs(collection(db,'users'));const a=[];s.forEach(d=>a.push({...d.data(),uid:d.id}));a.sort((x,y)=>x.username.localeCompare(y.username));
+$('players').innerHTML=a.map(u=>`<div class="card pcard"><div class="minibanner" style="${bannerStyle(u)}"></div><span class="avatar" style="background-image:url(${u.pfp||DEF})"></span>
+<div class="pf-name" style="font-size:1.25rem">${esc(u.username)}</div><button class="mini" style="margin-top:.7rem" onclick="viewProfile('${u.uid}')">Show full profile</button></div>`).join('')}
+
+/* CLIPS */
+async function loadClips(){const s=await getDocs(query(collection(db,'clips'),orderBy('createdAt','desc')));clips=[];s.forEach(d=>clips.push({id:d.id,...d.data()}));renderClips()}
+const lk=c=>(c.likes||[]).length;
+function clipCard(c){const liked=(c.likes||[]).includes(me.uid);
+return`<div class="card"><video controls preload="metadata" src="${esc(c.url)}" onplay="viewClip('${c.id}',this)"></video><div class="clip-meta"><h3 style="font-size:1rem">${esc(c.title)}</h3>
+<div>by <button class="link" onclick="viewProfile('${c.uid}')">${esc(c.username)}</button> <span class="chip">${gname(c.game)}</span></div>
+<span class="muted">${c.views||0} views</span><button class="mini like ${liked?'on':''}" onclick="likeClip('${c.id}')">${liked?'Liked':'Like'} · ${lk(c)}</button></div></div>`}
+const cgrid=a=>a.length?`<div class="grid">${a.map(clipCard).join('')}</div>`:'<p class="muted">No clips yet.</p>';
+function renderClips(){const t=$('clips'),lab=Object.fromEntries(SUBS);$('clip-title').textContent=lab[sub];renderSubs();
+if(sub==='all')t.innerHTML=cgrid(clips);
+else if(sub==='trend')t.innerHTML=`<div class="sec" style="font-size:1.1rem">Top 3 — Most Views</div>${cgrid([...clips].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,3))}<div class="sec" style="font-size:1.1rem;margin-top:2rem">Top 3 — Most Likes</div>${cgrid([...clips].sort((a,b)=>lk(b)-lk(a)).slice(0,3))}`;
+else if(sub==='games')t.innerHTML=`<div class="row" style="margin:0 0 1.2rem">${Object.keys(G).map(k=>`<button class="mini ${gfilter===k?'on':''}" onclick="gfilter_('${k}')">${G[k].n}</button>`).join('')}</div>${gfilter?cgrid(clips.filter(c=>c.game===gfilter)):'<p class="muted">Pick a game to see its clips.</p>'}`;
+else t.innerHTML=`<div class="card pad" style="max-width:520px"><div class="fl">Game</div><select class="sel" id="u-g">${gopts()}</select><div class="fl">Title</div><input class="ti" id="u-t" placeholder="Clip title"><div class="fl">Video file</div><input class="ti" id="u-f" type="file" accept="video/*"><div class="err" id="u-e"></div><button class="btn" id="u-b" style="margin-top:1rem" onclick="upClip()">Upload</button></div>`}
+window.gfilter_=k=>{gfilter=k;renderClips()};
+window.viewClip=async(id,v)=>{if(v.dataset.v)return;v.dataset.v=1;const c=clips.find(x=>x.id===id);c.views=(c.views||0)+1;updateDoc(doc(db,'clips',id),{views:increment(1)})};
+window.likeClip=async id=>{const c=clips.find(x=>x.id===id),on=(c.likes||[]).includes(me.uid);
+c.likes=on?c.likes.filter(x=>x!==me.uid):[...(c.likes||[]),me.uid];renderClips();await updateDoc(doc(db,'clips',id),{likes:on?arrayRemove(me.uid):arrayUnion(me.uid)})};
+window.upClip=async()=>{const f=$('u-f').files[0],t=$('u-t').value.trim(),b=$('u-b'),e=$('u-e');
+if(!f||!t){e.textContent='Add a title and choose a video';e.classList.add('show');return}
+if(f.size>100*1048576){e.textContent='Max 100 MB';e.classList.add('show');return}
+b.disabled=true;b.textContent='Uploading...';
+try{const r=ref(st,`clips/${me.uid}/${Date.now()}_${f.name.replace(/[^\w.-]/g,'_')}`);await uploadBytes(r,f);const url=await getDownloadURL(r);
+await addDoc(collection(db,'clips'),{game:$('u-g').value,title:t,url,uid:me.uid,username:me.username,views:0,likes:[],createdAt:Date.now()});toast('Clip uploaded');clipTab('all')}
+catch(x){e.textContent=x.message;e.classList.add('show');b.disabled=false;b.textContent='Upload'}};
+
+/* FIND A MATE */
+window.mateModal=()=>openModal(`<div class="modal-title">Find a mate</div><div class="fl">What game do you want a duo in?</div><select class="sel" id="m-g">${gopts()}</select>
+<div class="fl">Time you can play</div><div class="row" style="margin:0"><select class="sel" id="m-h" style="width:auto">${opts([...Array(12)].map((_,i)=>i+1))}</select>:<select class="sel" id="m-m" style="width:auto">${opts([...Array(12)].map((_,i)=>String(i*5).padStart(2,'0')))}</select><select class="sel" id="m-a" style="width:auto"><option>AM</option><option>PM</option></select></div>
+<div class="fl">Info (optional)</div><textarea class="ti" id="m-i" placeholder="Training, ranking up, just for fun..."></textarea>
+<div class="actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="confirmMate()">Confirm</button></div>`);
+window.confirmMate=async()=>{try{await addDoc(collection(db,'mates'),{uid:me.uid,username:me.username,game:$('m-g').value,time:`${$('m-h').value}:${$('m-m').value} ${$('m-a').value}`,info:$('m-i').value.trim(),createdAt:Date.now()});closeModal();toast('Request posted');loadMates()}catch(e){toast(e.message,true)}};
+async function loadMates(){const s=await getDocs(query(collection(db,'mates'),orderBy('createdAt','desc')));const a=[];s.forEach(d=>a.push(d.data()));
+$('mates').innerHTML=a.map(m=>`<div class="card pad"><button class="link" onclick="viewProfile('${m.uid}')">${esc(m.username)}</button><div style="margin:.4rem 0"><span class="chip">${gname(m.game)}</span> <span class="chip">${esc(m.time)}</span></div><p class="muted">${esc(m.info)||'No extra info'}</p></div>`).join('')||'<p class="muted">No requests yet.</p>'}
+
+/* CONTACT / REPORTS / ADMIN */
+window.reportModal=()=>openModal(`<div class="modal-title">Submit a report/complaint</div><div class="fl">Subject</div><input class="ti" id="r-s" placeholder="Main issue"><div class="fl">Body</div><textarea class="ti" id="r-b" placeholder="Describe the issue in full"></textarea>
+<div class="actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="sendReport()">Submit</button></div>`);
+window.sendReport=async()=>{const s=$('r-s').value.trim(),b=$('r-b').value.trim();if(!s||!b)return toast('Fill in subject and body',true);
+try{await addDoc(collection(db,'reports'),{uid:me.uid,username:me.username,subject:s,body:b,reply:'',createdAt:Date.now()});closeModal();toast('Report submitted');loadMyReps()}catch(e){toast(e.message,true)}};
+async function allReports(){const s=await getDocs(query(collection(db,'reports'),orderBy('createdAt','desc')));const a=[];s.forEach(d=>a.push({id:d.id,...d.data()}));return a}
+async function loadMyReps(){const a=(await allReports()).filter(r=>r.uid===me.uid);
+$('myreps').innerHTML=a.map(r=>`<div class="card pad" style="margin-bottom:.8rem"><h3>${esc(r.subject)}</h3><p class="muted" style="margin:.3rem 0">${esc(r.body)}</p>${r.reply?`<div class="kv"><span>Reply</span><b>${esc(r.reply)}</b></div>`:'<span class="chip">Awaiting reply</span>'}</div>`).join('')||'<p class="muted">No reports yet.</p>'}
+window.adminOpen=()=>openModal(`<div class="modal-title">Admin Panel</div><div class="fl">Admin code</div><input class="ti" id="ad-c" type="password" maxlength="4"><div class="actions"><button class="btn secondary" onclick="closeModal()">Cancel</button><button class="btn" onclick="adminCheck()">Unlock</button></div>`);
+window.adminCheck=async()=>{if($('ad-c').value!==ADMIN){toast('Wrong code',true);return}const a=await allReports();
+openModal(`<div class="modal-title">All reports (${a.length})</div>${a.map(r=>`<div class="card pad" style="margin-bottom:.8rem"><b>${esc(r.subject)}</b> <span class="muted">— ${esc(r.username)}, ${fmt(r.createdAt)}</span><p class="muted" style="margin:.4rem 0">${esc(r.body)}</p>
+<textarea class="ti" id="rp-${r.id}" placeholder="Reply...">${esc(r.reply)}</textarea><button class="mini" style="margin-top:.5rem" onclick="sendReply('${r.id}')">Send reply</button></div>`).join('')||'<p class="muted">No reports.</p>'}<div class="actions"><button class="btn secondary" onclick="closeModal()">Close</button></div>`)};
+window.sendReply=async id=>{try{await updateDoc(doc(db,'reports',id),{reply:$('rp-'+id).value.trim()});toast('Reply saved')}catch(e){toast(e.message,true)}};
+</script></body></html>
